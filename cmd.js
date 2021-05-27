@@ -1,4 +1,5 @@
 const yargs = require('yargs');
+const fs = require("fs");
 
 yargs.command({
     command: 'list',
@@ -22,11 +23,18 @@ yargs.command({
         }
     },
     handler: (argv) => {
-        const newNote = {
+        const newNote = [{
             title: argv.title,
             message: argv.message
-        }
-        console.log(newNote);
+        }]
+
+        const newNoteJSON = JSON.stringify(newNote);
+        fs.writeFile("data.json",newNoteJSON,(err) => {
+            if(err) console.log(err);
+            else {
+                console.log("La nouvelle note a été sauvegardée");
+            }
+        });
     }
 }).command({
     command: 'remove',
