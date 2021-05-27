@@ -1,1 +1,4 @@
-[{"title":"Nouvelle note","message":"lorem ipsum dolor"}]
+[
+    {"id":1, "title":"Nouvelle note","message":"lorem ipsum dolor"},
+    {"id":2, "title":"Une autre note","message":"Blabla"}
+]
