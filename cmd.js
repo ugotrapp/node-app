@@ -1,5 +1,7 @@
 const yargs = require('yargs');
 const fs = require("fs");
+const chalk = require("chalk");
+const { title } = require('process');
 
 yargs.command({
     command: 'list',
@@ -7,20 +9,13 @@ yargs.command({
     handler: () => {
         console.log("Voici la liste des notes");
 
-        fs.readFile("data.json", "utf-8", (err,data) => {
+        fs.readFile("data.json", "utf-8", (err,dataJSON) => {
             if(err) console.log(err);
             else {
-                const notes = JSON.parse(data);
-
-                // Boucle for classique
-                // for(let i=0; i<notes.length;i++) {
-                //     console.log(`${notes[i].id}. ${notes[i].title}`);
-                // }
-
-                // foreach
+                const notes = JSON.parse(dataJSON);
                 notes.forEach(note => {
-                    console.log(`${note.id}. ${note.title}`);
-                })
+                    console.log(chalk.inverse.green(`${note.id}. ${note.title}`));
+                })    
             }
         })
     }
@@ -28,41 +23,120 @@ yargs.command({
     command: 'add',
     describe: "Ajoute une note",
     builder: {
+
+        id:{
+            describe:"id de la note",
+            demandOption:true,
+            type: Number
+        },
         title: {
             describe: "Titre de ma note",
             demandOption: true,
             type: "string"
         },
-        message: {
+        body: {
             describe: "Message de ma note",
             demandOption: false,
             type: "string"
         }
     },
     handler: (argv) => {
-        const newNote = [{
-            title: argv.title,
-            message: argv.message
-        }]
+        // Pour modifier le contenu d'un fichier
+        // 1. le récupérer
+        fs.readFile("data.json", "utf-8", (err,dataJSON) => {
+            // 1a. Grâce à utf-8, le contenu du fichier
+            // est en  en chaîne de caractère
+            console.log(dataJSON)
 
-        const newNoteJSON = JSON.stringify(newNote);
-        fs.writeFile("data.json",newNoteJSON,(err) => {
-            if(err) console.log(err);
-            else {
-                console.log("La nouvelle note a été sauvegardée");
+            // 1b. Je transforme la string JSON en valeur JS
+            const notes = JSON.parse(dataJSON)
+            console.log(notes);
+    
+            // 2. Exécuter les modifications en JS
+
+            const objetNotes = {
+                id:argv.id,
+                title: argv.title,
+                body: argv.body
             }
-        });
+
+            notes.push(objetNotes);
+            console.log(notes);
+    
+            // 2b. Transformer mes modifs valeurs JS en chaine JSON
+            const notesJSON = JSON.stringify(notes);
+            console.log(notesJSON);
+
+            // 3. Envoyer les modifs de mon JSON en écrasant le fichier
+            fs.writeFile("data.json",notesJSON,(err) => {
+                if(err) console.log(err);
+                else {
+                    console.log(chalk.green("La note a été ajoutée"));
+                }
+            });
+        })
     }
 }).command({
     command: 'remove',
     describe: "Supprime une note",
-    handler: () => {
-        console.log("Chaud pour supprimer une note");
+    handler: (argv) => {
+        fs.readFile("data.json", "utf-8", (err,dataJSON) => {
+            console.log(dataJSON);
+            const id = JSON.parse(dataJSON)
+            console.log(id)
+               
+                
+
+            for(let i=0;i < id.length; i++){
+                if (id[i].id === argv.id) {
+                    id.splice(i, 1)
+                }
+            }
+
+    
+
+            const idJSON = JSON.stringify(id);
+            console.log(idJSON);
+
+            fs.writeFile("data.json",idJSON,(err) => {
+                if(err) console.log(err);
+                else {
+
+                    
+        console.log(chalk.bold.red("la note a été supprimé"));
+            }
+        });
+    })
     }
 }).command({
     command: 'read',
     describe: "Affiche le détail d'une note",
-    handler: () => {
-        console.log("Voici le détail d'une note");
+    handler: (argv) => {
+
+        fs.readFile("data.json", "utf-8", (err,dataJSON) => {
+            if(err) console.log(err);
+            else {
+                const notes = JSON.parse(dataJSON);
+                
+                const note = notes.find(note => note.id === argv.id)
+                    {
+                        console.log(chalk.inverse.green(`Voici la note ${argv.id}`))
+                        console.log(note);
+                        
+                    }
+            
+                }
+
+                
+                  
+            })
+        
     }
+        
+
+        
+        
+        
+    
+        
 }).argv;
